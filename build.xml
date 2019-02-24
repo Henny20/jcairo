@@ -8,7 +8,7 @@
      ====================================================================== -->
 <project name="JCairo" default="jar">
          <description>
-           jcair build file
+           jcairo build file
         </description>
 	  <!-- set global properties for this build -->
 	  <property name="src" location="src"/>
