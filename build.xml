@@ -7,6 +7,13 @@
      Hennie van Gameren                                                               
      ====================================================================== -->
 <project name="JCairo" default="jar">
+         <description>
+           jcair build file
+        </description>
+	  <!-- set global properties for this build -->
+	  <property name="src" location="src"/>
+	  <property name="build" location="build"/>
+	  <property name="dist" location="dist"/>
 
 	<property file="ant.properties"/>
 	
