@@ -1,118 +1,66 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- ====================================================================== 
-     13 oct. 08 22:02:51                                                        
+<project name="JCairo" default="dist" basedir=".">
+  <description>
+    xxxxxxxxxxxxxxx
+  </description>
+  <!-- set global properties for this build -->
+  <property file="ant.properties"/>
+  <!--property name="src" location="src"/>
+  <property name="build" location="build"/>
+  <property name="dist" location="dist"/-->
 
-     JCairo Java Build
-                   
-     Hennie van Gameren                                                               
-     ====================================================================== -->
-<project name="JCairo" default="jar">
-         <description>
-           jcairo build file
-        </description>
-	  
-	<property file="ant.properties"/>
-	
-	<path id="base.path">
-		<fileset dir="${dest}">
-			<include name="**/*.jar" />
-		</fileset>
-	</path>
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
 
-	<path id="tests.path">
-		<path refid="base.path" />
-		<pathelement location="${build}" />
-	</path>
+  <target name="compile" depends="init"
+        description="compile the source">
+    <!-- Compile the Java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"/>
+  </target>
 
-	<macrodef name="test">
-		<attribute name="target" />
-		<attribute name="param" default="" />
-		<sequential>
-			<condition property="test.param" value="@{param}">
-				<not>
-					<equals arg1="@{param}" arg2="" />
-				</not>
-			</condition>
-			<property name="test.target" value="@{target}" />
-			<antcall target="test-target" />
-			<antcall target="test-target-param" />
-		</sequential>
-	</macrodef>
-	
-	<target name="all" depends="jar, gen" description="Generates the java and native libraries and compile the test classes.">
-		<exec executable="/bin/sh">
-			<arg value="compile.sh"/>
-		</exec>
-	</target>
-	
-	<target name="java" depends="jar, compile-tests" description="Generates ${jar.name} and compile the test classes.">
-	</target>
+  <target name="dist" depends="compile"
+        description="generate the distribution">
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
 
-	<target name="test-target" unless="test.param" >
-		<java fork="true" classname="${test.launcher}" classpathref="tests.path">
-			<jvmarg value="-Djava.library.path=${dest}" />
-			<arg value="${test.pkg}.${test.target}" />
-		</java>
-	</target>
+    <!-- Put everything in ${build} into the JCairo-${DSTAMP}.jar file -->
+    <jar jarfile="${dist}/lib/JCairo-${DSTAMP}.jar" basedir="${build}"/>
+  </target>
 
-	<target name="test-target-param" if="test.param">
-		<echo>Test with param ${test.param}</echo>
-		<java fork="true" classname="${test.launcher}" classpathref="tests.path">
-			<sysproperty key="java.library.path" value="${dest}" />
-			<arg value="${test.pkg}.${test.target}" />
-			<arg value="${test.param}" />
-		</java>
-	</target>
+  <target name="javah">
+     <javah destdir="${nsrc}" force="yes" classpath="${build}">
+            <class name="org.jcairo.CairoSurface"/>
+            <class name="org.jcairo.CairoPattern"/>
+            <class name="org.jcairo.CairoContext"/>
+            <class name="org.jcairo.SvgSurface"/>
+            <class name="org.jcairo.ImageSurface"/>
+            <class name="org.jcairo.PdfSurface"/>
+            <class name="org.jcairo.TextExtents"/>
+      </javah>
+   </target>
 
-	<target name="jar" depends="init" description="Generates the distribution jar (${jar.name})">
-		<javac destdir="${build}" includes="org/jcairo/**">
-			<src path="${src}" />
-		</javac>
-		<mkdir dir="${dest}"/>
-		<jar destfile="${dest}/${jar.name}" basedir="${build}">
-		</jar>
-                 <javah destdir="src/main/c" classpath="${basedir}/build">
-                          <class name="org.jcairo.CairoSurface"/>
-                          <class name="org.jcairo.CairoPattern"/>
-                          <class name="org.jcairo.CairoContext"/>
-                          <class name="org.jcairo.SvgSurface"/>
-                          <class name="org.jcairo.ImageSurface"/>
-                          <class name="org.jcairo.PdfSurface"/>
-                         <class name="org.jcairo.TextExtents"/>
-                 </javah>
-	</target>
+  <target name="all" depends="dist, compile, javah, gen" description="Generates the java and native libraries and compile the test classes.">
+	<exec executable="/bin/sh">
+		<arg value="compile.sh"/>
+	</exec>
+  </target>
 
-	<target name="javadoc" description="Generates the java api documentation">
-		<delete dir="doc" />
-		<javadoc destdir="doc" packagenames="org.jcairo.*" sourcepath="${src}" public="yes">
-			<tag scope="all" name="clutter.version" description="Since Clutter:">
-			</tag>
-		</javadoc>
-	</target>
+  <target name="clean"
+        description="clean up">
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
 
-	<target name="init">
-		<delete dir="${build}" />
-		<mkdir dir="${build}" />
-	</target>
-
-	<target name="clean">
-		<delete dir="${build}" />
-		<delete dir="${dest}" />
-		<delete file="compile.sh" />
-	</target>
-
-	<target name="gen" description="Creates a script that compiles the native source (compile.sh)">
-		<mkdir dir="${dest}"/>
-<echo file="compile.sh" >
-${compile.env}
-${compile.command}
-</echo>
-		<chmod file="compile.sh" perm="a+rx"/>
-	</target>
-
-	<target name="compile-tests" depends="init" description="">
-		<javac srcdir="${src.test}" encoding="UTF-8" destdir="${build}" classpathref="base.path" debug="on" debuglevel="lines,vars,source">
-		</javac>
-	</target>
-
+  <target name="gen" description="Creates a script that compiles the native source (compile.sh)">
+     <mkdir dir="${dist}"/>
+     <echo file="compile.sh" >
+     ${compile.env}
+     ${compile.command}
+     </echo>
+     <chmod file="compile.sh" perm="a+rx"/>
+  </target> 
 </project>
