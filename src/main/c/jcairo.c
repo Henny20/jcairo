@@ -1,4 +1,10 @@
-#include "jcairo.h"
+//#include "jcairo.h"
+#include "org_jcairo_CairoContext.h"
+#include "org_jcairo_CairoPattern.h"
+#include "org_jcairo_SvgSurface.h"
+#include "org_jcairo_ImageSurface.h"      
+#include "org_jcairo_PdfSurface.h"
+#include "org_jcairo_TextExtents.h"
 #include <cairo/cairo.h>
 #include <cairo/cairo-svg.h> 
 #include <cairo/cairo-pdf.h> 
@@ -36,9 +42,13 @@ cairo_scale(cr, param0, param1);
 JNIEXPORT void JNICALL Java_org_jcairo_CairoContext_setSourceRGBA(JNIEnv *env, jobject obj, jdouble param0, jdouble param1, jdouble param2, jdouble param3){
 cairo_set_source_rgba(cr, param0, param1, param2, param3);
 }
-JNIEXPORT void JNICALL Java_org_jcairo_CairoContext_setSource(JNIEnv *env, jobject obj, jint param0){
+//JNIEXPORT void JNICALL Java_org_jcairo_CairoContext_setSource(JNIEnv *env, jobject obj, jint param0){
+//cairo_set_source(cr, pat);
+//}
+JNIEXPORT void JNICALL Java_org_jcairo_CairoContext_setSource(JNIEnv *env, jobject obj0, jobject obj1){
 cairo_set_source(cr, pat);
 }
+
 JNIEXPORT void JNICALL Java_org_jcairo_CairoContext_setSourceRGB(JNIEnv *env, jobject obj, jdouble red, jdouble green, jdouble blue){
 cairo_set_source_rgb(cr, red, green, blue);
 }
@@ -232,24 +242,32 @@ JNIEXPORT void JNICALL Java_org_jcairo_CairoPattern_destroy(JNIEnv *env, jobject
 cairo_pattern_destroy(pat);
 }
 JNIEXPORT jint JNICALL Java_org_jcairo_CairoPattern_getType(JNIEnv *env, jobject obj){
-return (jint)cairo_pat_get_type(pat);
+return (jint)cairo_pattern_get_type(pat);
 }
-JNIEXPORT jint JNICALL Java_org_jcairo_CairoPattern_create(JNIEnv *env, jclass cl, jdouble param0, jdouble param1, jdouble param2){
-return (jint)cairo_pattern_create(pat, param0, param1, param2);
-}
+//vreemd
+//JNIEXPORT jint JNICALL Java_org_jcairo_CairoPattern_create(JNIEnv *env, jclass cl, jdouble param0, jdouble param1, jdouble param2){
+//return (jint)cairo_pattern_create(pat, cl, param0, param1, param2);
+//}
+
+////////////////////////
 JNIEXPORT jint JNICALL Java_org_jcairo_CairoPattern_status(JNIEnv *env, jobject obj){
 return (jint)cairo_pattern_status(pat);
 }
 JNIEXPORT jint JNICALL Java_org_jcairo_CairoPattern_getReferenceCount(JNIEnv *env, jobject obj){
 return (jint)cairo_pattern_get_reference_count(pat);
 }
-JNIEXPORT void JNICALL Java_org_jcairo_CairoPattern_createWithAlpha(JNIEnv *env, jobject obj, jdouble param0, jdouble param1, jdouble param2, jdouble param3){
+////////////////
+JNIEXPORT jint JNICALL Java_org_jcairo_CairoPattern_createWithAlpha
+  (JNIEnv *env, jclass cl, jdouble param0, jdouble param1, jdouble param2, jdouble param3){
+
+//JNIEXPORT void JNICALL Java_org_jcairo_CairoPattern_createWithAlpha(JNIEnv *env, jobject obj, //jdouble param0, jdouble param1, jdouble param2, jdouble param3){
 pat = cairo_pattern_create_rgba(param0, param1, param2, param3);
 }
-JNIEXPORT void JNICALL Java_org_jcairo_CairoPattern_createLinear(JNIEnv *env,  jobject obj,  jdouble param0, jdouble param1, jdouble param2, jdouble param3){
+
+JNIEXPORT jint JNICALL Java_org_jcairo_CairoPattern_createLinear(JNIEnv *env,  jclass cl,  jdouble param0, jdouble param1, jdouble param2, jdouble param3){
 pat = cairo_pattern_create_linear(param0, param1, param2, param3);
 }
-JNIEXPORT void JNICALL Java_org_jcairo_CairoPattern_createRadial(JNIEnv *env, jobject obj, jdouble param0, jdouble param1, jdouble param2, jdouble param3, jdouble param4, jdouble param5){
+JNIEXPORT jint JNICALL Java_org_jcairo_CairoPattern_createRadial(JNIEnv *env, jobject obj, jdouble param0, jdouble param1, jdouble param2, jdouble param3, jdouble param4, jdouble param5){
 pat = cairo_pattern_create_radial(param0, param1, param2, param3, param4, param5);
 }
 JNIEXPORT void JNICALL Java_org_jcairo_CairoPattern_addColorStop(JNIEnv *env, jobject obj, jdouble param0, jdouble param1, jdouble param2, jdouble param3){
@@ -407,9 +425,6 @@ JNIEXPORT void JNICALL Java_org_jcairo_ImageSurface_createSurfaceImage
   (JNIEnv *env, jobject obj, jint param0, jdouble param1, jdouble param2){ 
 surface = cairo_image_surface_create(param0, param1, param2);
 }
-
-
-
 
 JNIEXPORT void JNICALL Java_org_jcairo_PdfSurface_createSurfacePdf(JNIEnv *env, jobject obj , jstring n, jdouble param0,  jdouble param1){
   const char *bestandsnaam = (*env)->GetStringUTFChars(env, n, 0);
